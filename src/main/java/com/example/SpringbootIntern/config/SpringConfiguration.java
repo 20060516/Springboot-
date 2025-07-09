@@ -29,8 +29,8 @@ public class SpringConfiguration {
                 csrf((csrf)->csrf.disable())
                 .authorizeHttpRequests(auth-> {
 
-    //              auth.requestMatchers(HttpMethod.POST,"/employee").hasRole("ADMIN");
-    //                auth.requestMatchers(HttpMethod.PUT,"/employee").hasRole("ADMIN");
+                  auth.requestMatchers(HttpMethod.POST,"/employee").hasRole("ADMIN");
+                    auth.requestMatchers(HttpMethod.PUT,"/employee").hasRole("ADMIN");
                     auth.requestMatchers(HttpMethod.DELETE,"/employee").hasRole("ADMIN");
                     auth.requestMatchers(HttpMethod.GET,"/**").hasRole("ADMIN");
                     auth.anyRequest().authenticated();
