@@ -1,8 +1,7 @@
 package com.example.SpringbootIntern.controllers;
 
-
 import com.example.SpringbootIntern.models.RegisterDetails;
-import com.example.SpringbootIntern.models.UserDetailsDto;
+import com.example.SpringbootIntern.models.Task;
 import com.example.SpringbootIntern.services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,49 +17,55 @@ public class EmployeeController {
 
     @GetMapping("/")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    public String route(){
+    public String route() {
         return "Welcome to SpringBoot Security";
     }
 
-
     @GetMapping("/employee")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    public List<RegisterDetails> getMethod(){
+    public List<RegisterDetails> getMethod() {
         return employeeService.getMethod();
     }
 
-
     @GetMapping("/employee/{empId}")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    public RegisterDetails getEmployeeById(@PathVariable int empId){
-        System.out.println();
+    public RegisterDetails getEmployeeById(@PathVariable int empId) {
         return employeeService.getEmployeeById(empId);
     }
 
-
-
-//    @PreAuthorize("hasAnyRole('ADMIN','USER')")
-//    @GetMapping("/employee/job/{job}")
-//    public List<RegisterDetails> getEmployeeByJob(@PathVariable String job){
-//        return employeeService.getEmployeeByJob(job);
-//    }
-
     @PostMapping("/employee")
     @PreAuthorize("hasRole('ADMIN')")
-    public String postMethod(@RequestBody RegisterDetails employee){
-//        Employee employee = new Employee(5,"Sivagami", "Business");
+    public String postMethod(@RequestBody RegisterDetails employee) {
         return employeeService.addEmployee(employee);
     }
 
     @PutMapping("/employee/{empId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String putMethod(@PathVariable int empId){
-        return employeeService.updateEmployee(empId);
+    public String updateById(@PathVariable int empId, @RequestBody RegisterDetails employee) {
+        return employeeService.updateEmployeeById(empId, employee);
     }
 
-    @DeleteMapping("/employee/{empID}")
+    @DeleteMapping("/employee/{empId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteMethod(@PathVariable int empID){
-        return employeeService.deleteEmployeeById(empID);
+    public String deleteMethod(@PathVariable int empId) {
+        return employeeService.deleteEmployeeById(empId);
+    }
+
+    @GetMapping("/employee/role/{roleName}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    public List<RegisterDetails> getEmployeesByRole(@PathVariable String roleName) {
+        return employeeService.getEmployeesByRole(roleName);
+    }
+
+    @PostMapping("/employee/{empId}/assign-task")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String assignTask(@PathVariable int empId, @RequestBody Task task) {
+        return employeeService.assignTaskToEmployee(empId, task);
+    }
+
+    @GetMapping("/employee/{empId}/tasks")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    public List<Task> getEmployeeTasks(@PathVariable int empId) {
+        return employeeService.getTasksByEmployee(empId);
     }
 }
