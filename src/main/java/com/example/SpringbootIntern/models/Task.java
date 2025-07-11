@@ -20,4 +20,7 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private RegisterDetails employee;
+
+    public void setEmployee(RegisterDetails employee) {
+    }
 }

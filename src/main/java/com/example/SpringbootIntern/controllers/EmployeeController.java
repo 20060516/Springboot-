@@ -2,6 +2,7 @@ package com.example.SpringbootIntern.controllers;
 
 import com.example.SpringbootIntern.models.RegisterDetails;
 import com.example.SpringbootIntern.models.Task;
+import com.example.SpringbootIntern.models.UserDetailsDto;
 import com.example.SpringbootIntern.services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,8 +24,8 @@ public class EmployeeController {
 
     @GetMapping("/employee")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    public List<RegisterDetails> getMethod() {
-        return employeeService.getMethod();
+    public List<RegisterDetails> getAllEmployees() {
+        return employeeService.getAllEmployees();
     }
 
     @GetMapping("/employee/{empId}")
@@ -35,19 +36,19 @@ public class EmployeeController {
 
     @PostMapping("/employee")
     @PreAuthorize("hasRole('ADMIN')")
-    public String postMethod(@RequestBody RegisterDetails employee) {
-        return employeeService.addEmployee(employee);
+    public String addEmployee(@RequestBody UserDetailsDto employeeDto) {
+        return employeeService.addNewEmployee(employeeDto);
     }
 
     @PutMapping("/employee/{empId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String updateById(@PathVariable int empId, @RequestBody RegisterDetails employee) {
+    public String updateEmployee(@PathVariable int empId, @RequestBody RegisterDetails employee) {
         return employeeService.updateEmployeeById(empId, employee);
     }
 
     @DeleteMapping("/employee/{empId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteMethod(@PathVariable int empId) {
+    public String deleteEmployee(@PathVariable int empId) {
         return employeeService.deleteEmployeeById(empId);
     }
 
