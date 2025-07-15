@@ -69,4 +69,9 @@ public class EmployeeController {
     public List<Task> getEmployeeTasks(@PathVariable int empId) {
         return employeeService.getTasksByEmployee(empId);
     }
+
+
+    public List<RegisterDetails> getMethod() {
+        return employeeService.getMethod();
+    }
 }

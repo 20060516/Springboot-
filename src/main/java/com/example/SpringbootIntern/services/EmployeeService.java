@@ -105,4 +105,9 @@ public class EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Employee ID not found"));
         return taskRepository.findByEmployee(employee);
     }
+
+
+    public List<RegisterDetails> getMethod() {
+        return registerDetailsRepository.findAll();
+    }
 }
