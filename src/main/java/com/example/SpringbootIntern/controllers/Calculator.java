@@ -2,9 +2,6 @@ package com.example.SpringbootIntern.controllers;
 
 public class Calculator {
 
-    public String calculatorTest(){
-        return "Successfully calculated";
-    }
     public int add(int a, int b) {
         return a + b;
     }
