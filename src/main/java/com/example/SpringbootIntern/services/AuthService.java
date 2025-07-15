@@ -11,27 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class AuthService {
-
-    @Autowired
-    private RegisterRepository registerRepository;
-
-    @Autowired
-    private RegisterDetailsRepository registerDetailsRepository;
-
-    @Autowired
-    private RolesRepository rolesRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -39,36 +26,24 @@ public class AuthService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    public String addNewEmployee(UserDetailsDto register) {
-        RegisterDetails registerDetails = new RegisterDetails();
-        registerDetails.setEmpId(register.getEmpId());
-        registerDetails.setName(register.getName());
-        registerDetails.setEmail(register.getEmail());
-        registerDetails.setPassword(passwordEncoder.encode(register.getPassword()));
-        registerDetails.setUserName(register.getUserName());
-
-        Set<Roles> roles = new HashSet<>();
-        for (String roleName : register.getRoleName()) {
-            Roles role = RolesRepository.findByRoleName(roleName)
-                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
-            roles.add(role);
-        }
-        registerDetails.setRoles(roles);
-        registerDetailsRepository.save(registerDetails);
-        return "Employee Added Successfully";
-    }
-
-    public String authenticate(RegisterDetails login) {
+    public Map<String, Object> authenticate(RegisterDetails login) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        login.getUserName(),
-                        login.getPassword()
+                        login.getUserName(), login.getPassword()
                 )
         );
-        return jwtTokenProvider.generateToken(authentication);
-    }
 
-    public Optional<RegisterDetails> getUserByUsername(String username) {
-        return registerRepository.findByUserName(username);
+        String token = jwtTokenProvider.generateToken(authentication);
+        String role = "";
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            role = authority.getAuthority();
+            break;
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", token);
+        result.put("username", login.getUserName());
+        result.put("role", role);
+
+        return result;
     }
 }
