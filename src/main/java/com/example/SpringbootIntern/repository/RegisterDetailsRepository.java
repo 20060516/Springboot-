@@ -10,10 +10,6 @@ import java.util.Optional;
 @Repository
 public interface RegisterDetailsRepository extends JpaRepository<RegisterDetails, Integer> {
 
-    RegisterDetails findByEmail(String email);
+    Optional<RegisterDetails> findByUserName(String userName);
 
-    Optional<Object> findByUserName(String username);
-
-    boolean existsByEmail(String email);
-    List<RegisterDetails> findByRolesRoleName(String roleName);
 }

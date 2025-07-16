@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
+/*
 class EmployeeControllerTest {
 
     @Mock
@@ -75,4 +75,36 @@ class EmployeeControllerTest {
         assertEquals("Added", response);
     }
 
+}*/
+
+class EmployeeControllerTest {
+
+    @Mock
+    EmployeeService employeeService;
+
+    @InjectMocks
+    EmployeeController employeeController;
+
+    @BeforeEach
+    void setUp(){
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testRoute(){
+        String result = employeeController.route();
+        assertEquals("Welcome to SpringBoot Security",result);
+    }
+
+    @Test
+    void testGetMethod(){
+        RegisterDetails emp1 = new RegisterDetails();
+        RegisterDetails emp2 = new RegisterDetails();
+        when(employeeService.getMethod()).thenReturn(Arrays.asList(emp1,emp2));
+        List<RegisterDetails> result = employeeController.getMethod();
+        when(employeeService.getMethod()).
+                thenReturn(Arrays.asList(emp1,emp2));
+        List<RegisterDetails> result1 = employeeController.getMethod();
+        assertEquals(2,result.size());
+    }
 }

@@ -1,49 +1,84 @@
 package com.example.SpringbootIntern.services;
 
 import com.example.SpringbootIntern.jwt.JwtTokenProvider;
-import com.example.SpringbootIntern.models.RegisterDetails;
-import com.example.SpringbootIntern.models.Roles;
-import com.example.SpringbootIntern.models.UserDetailsDto;
-import com.example.SpringbootIntern.repository.RegisterDetailsRepository;
-import com.example.SpringbootIntern.repository.RegisterRepository;
-import com.example.SpringbootIntern.repository.RolesRepository;
+import com.example.SpringbootIntern.models.*;
+import com.example.SpringbootIntern.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
 
     @Autowired
+    RegisterRepository registerRepository;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    RegisterDetailsRepository registerDetailsRepository;
 
-    public Map<String, Object> authenticate(RegisterDetails login) {
+    @Autowired
+    RolesRepository rolesRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    public String addNewEmployee(UserDetailsDto register) {
+        RegisterDetails registerDetails = new RegisterDetails();
+        registerDetails.setEmpId(register.getEmpId());
+        registerDetails.setName(register.getName());
+        registerDetails.setEmail(register.getEmail());
+        registerDetails.setPassword(passwordEncoder.encode(register.getPassword()));
+        registerDetails.setUserName(register.getUserName());
+
+        Set<Roles> roles = new HashSet<>();
+        for (String roleName : register.getRoleName()) {
+            Roles role = rolesRepository.findByRoleName(roleName)
+                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+            roles.add(role);
+        }
+        registerDetails.setRoles(roles);
+
+        System.out.println("Registration: " + registerDetails);
+        registerDetailsRepository.save(registerDetails);
+        return "Employee Added Successfully";
+    }
+
+    public String authenticate(RegisterDetails login) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        login.getUserName(), login.getPassword()
-                )
+                        login.getUserName(), login.getPassword()));
+        return jwtTokenProvider.generateToken(authentication);
+    }
+
+    // ✅ Fixed method signature and structure
+    public JwtResponse authenticateWithToken(RegisterDetails login) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(login.getUserName(), login.getPassword())
         );
-
         String token = jwtTokenProvider.generateToken(authentication);
-        String role = "";
-        for (GrantedAuthority authority : authentication.getAuthorities()) {
-            role = authority.getAuthority();
-            break;
-        }
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", token);
-        result.put("username", login.getUserName());
-        result.put("role", role);
+        String username = login.getUserName();
 
-        return result;
+        List<String> roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        String joinedRoles = String.join(",", roles);
+
+        return new JwtResponse(token, username, joinedRoles);
+    }
+
+    public Optional<RegisterDetails> getUserByUsername(String username) {
+        return registerRepository.findByUserName(username);
     }
 }

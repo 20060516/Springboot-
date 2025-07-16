@@ -47,7 +47,6 @@ public class EmployeeService {
 
     public String addNewEmployee(UserDetailsDto register) {
         RegisterDetails registerDetails = new RegisterDetails();
-        registerDetails.setEmpId(register.getEmpId());
         registerDetails.setName(register.getName());
         registerDetails.setEmail(register.getEmail());
         registerDetails.setUserName(register.getUserName());
@@ -55,14 +54,15 @@ public class EmployeeService {
 
         Set<Roles> roles = new HashSet<>();
         for (String roleName : register.getRoleName()) {
-            Roles role = RolesRepository.findByRoleName(roleName)
+            Roles role = rolesRepository.findByRoleName(roleName)
                     .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
             roles.add(role);
         }
 
         registerDetails.setRoles(roles);
         registerDetailsRepository.save(registerDetails);
-        return "Employee Added Successfully using DTO";
+
+        return "Employee Registered Successfully";
     }
 
     public String updateEmployeeById(int empId, RegisterDetails employee) {

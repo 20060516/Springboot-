@@ -8,32 +8,31 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
+
     @Autowired
-    RegisterDetailsRepository registerDetailsRepository;
+    private RegisterDetailsRepository userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        /*
-        3 things
-        1. Loading data from your database
-        2. setting up the authorities
-        3. returning up proper UserDetails
-         */
+        RegisterDetails user = userRepo.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        //Step 1
-        RegisterDetails user = (RegisterDetails) registerDetailsRepository.findByUserName(username)
-                .orElseThrow(()->new RuntimeException("User Not Found"));
+        return new User(user.getUserName(), user.getPassword(), getAuthorities(user));
+    }
 
-        //Step 2
-        Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(roles -> new SimpleGrantedAuthority(roles.getRoleName()))
+    private Collection<? extends GrantedAuthority> getAuthorities(RegisterDetails user) {
+        Set<String> roleNames = user.getRoles().stream()
+                .map(role -> role.getRoleName()) // e.g., "ROLE_USER", "ROLE_ADMIN"
                 .collect(Collectors.toSet());
-        System.out.println("Username is " + user.getUserName() + "\nPassword is " + user.getPassword() + "\nAuthority is " + authorities);
-        return new User(user.getUserName(), user.getPassword() ,authorities);
+
+        return roleNames.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 }

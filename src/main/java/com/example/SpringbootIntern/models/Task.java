@@ -22,5 +22,6 @@ public class Task {
     private RegisterDetails employee;
 
     public void setEmployee(RegisterDetails employee) {
+        this.employee = employee;
     }
 }
