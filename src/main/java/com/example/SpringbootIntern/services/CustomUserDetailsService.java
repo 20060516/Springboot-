@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private Collection<? extends GrantedAuthority> getAuthorities(RegisterDetails user) {
         Set<String> roleNames = user.getRoles().stream()
-                .map(role -> role.getRoleName()) // e.g., "ROLE_USER", "ROLE_ADMIN"
+                .map(role -> "ROLE_" + role.getRoleName())
                 .collect(Collectors.toSet());
 
         return roleNames.stream()

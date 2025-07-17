@@ -16,30 +16,30 @@ import java.util.stream.Collectors;
 public class AuthService {
 
     @Autowired
-    RegisterRepository registerRepository;
+    private RegisterDetailsRepository registerDetailsRepository;
+
+    @Autowired
+    private RolesRepository rolesRepository;
+
+    @Autowired
+    private RegisterRepository registerRepository;
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    RegisterDetailsRepository registerDetailsRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    RolesRepository rolesRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
+    private JwtTokenProvider jwtTokenProvider;
 
     public String addNewEmployee(UserDetailsDto register) {
         RegisterDetails registerDetails = new RegisterDetails();
         registerDetails.setEmpId(register.getEmpId());
         registerDetails.setName(register.getName());
         registerDetails.setEmail(register.getEmail());
-        registerDetails.setPassword(passwordEncoder.encode(register.getPassword()));
         registerDetails.setUserName(register.getUserName());
+        registerDetails.setPassword(passwordEncoder.encode(register.getPassword()));
 
         Set<Roles> roles = new HashSet<>();
         for (String roleName : register.getRoleName()) {
@@ -49,7 +49,6 @@ public class AuthService {
         }
         registerDetails.setRoles(roles);
 
-        System.out.println("Registration: " + registerDetails);
         registerDetailsRepository.save(registerDetails);
         return "Employee Added Successfully";
     }
@@ -61,7 +60,6 @@ public class AuthService {
         return jwtTokenProvider.generateToken(authentication);
     }
 
-    // ✅ Fixed method signature and structure
     public JwtResponse authenticateWithToken(RegisterDetails login) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(login.getUserName(), login.getPassword())
